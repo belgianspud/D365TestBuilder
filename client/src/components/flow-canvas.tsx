@@ -279,7 +279,7 @@ export default function FlowCanvas({
   );
 
   return (
-    <div className="flex-1 bg-gray-50 relative" ref={reactFlowWrapper}>
+    <div className="w-full h-full bg-gray-50 relative" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}

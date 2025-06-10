@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Save, FolderOpen, Play, Bot, Settings, Globe, Key } from "lucide-react";
+import { Save, FolderOpen, Play, Bot, Settings, Globe, Key, Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import ComponentPalette from "@/components/component-palette";
 import FlowCanvas from "@/components/flow-canvas";
 import PropertiesPanel from "@/components/properties-panel";
@@ -27,6 +27,11 @@ export default function FlowBuilder() {
   const [selectedEnvironment, setSelectedEnvironment] = useState("");
   const [environmentUrl, setEnvironmentUrl] = useState("");
   const [selectedCredential, setSelectedCredential] = useState("");
+  
+  // UI state for collapsible panels
+  const [showSettings, setShowSettings] = useState(true);
+  const [showComponentPalette, setShowComponentPalette] = useState(true);
+  const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -200,175 +205,270 @@ export default function FlowBuilder() {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSettings(!showSettings)}
+                className="p-2"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center gap-3">
+                <Bot className="h-8 w-8 text-blue-600" />
+                <h1 className="text-xl font-semibold text-gray-900">D365 Test Automation Builder</h1>
+              </div>
+              {testCaseName && (
+                <div className="h-6 w-px bg-gray-200 ml-2"></div>
+              )}
+              {testCaseName && (
+                <span className="text-sm text-gray-600">{testCaseName}</span>
+              )}
+            </div>
             <div className="flex items-center gap-3">
-              <Bot className="h-8 w-8 text-blue-600" />
-              <h1 className="text-xl font-semibold text-gray-900">D365 Test Automation Builder</h1>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoad}
+                disabled={!testCases || !Array.isArray(testCases) || testCases.length === 0}
+              >
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Load
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleSave}
+                disabled={saveTestCaseMutation.isPending}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {saveTestCaseMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleRun}
+                disabled={runTestMutation.isPending || !currentTestCase}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Play className="h-4 w-4 mr-2" />
+                {runTestMutation.isPending ? "Running..." : "Run Test"}
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLoad}
-              disabled={!testCases || !Array.isArray(testCases) || testCases.length === 0}
-            >
-              <FolderOpen className="h-4 w-4 mr-2" />
-              Load
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleSave}
-              disabled={saveTestCaseMutation.isPending}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saveTestCaseMutation.isPending ? "Saving..." : "Save"}
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleRun}
-              disabled={runTestMutation.isPending || !currentTestCase}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Play className="h-4 w-4 mr-2" />
-              {runTestMutation.isPending ? "Running..." : "Run Test"}
-            </Button>
+        </div>
+
+        {/* Collapsible Settings Panel */}
+        {showSettings && (
+          <div className="px-6 pb-4 border-t border-gray-100">
+            <div className="flex items-center gap-2 mb-3 pt-4">
+              <Settings className="h-4 w-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">Test Case Configuration</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSettings(false)}
+                className="ml-auto p-1"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Test Case Details */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Test Case Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label htmlFor="testName" className="text-xs">Test Case Name</Label>
+                    <Input
+                      id="testName"
+                      placeholder="Enter test case name"
+                      value={testCaseName}
+                      onChange={(e) => setTestCaseName(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="testDescription" className="text-xs">Description (Optional)</Label>
+                    <Input
+                      id="testDescription"
+                      placeholder="Brief description"
+                      value={testCaseDescription}
+                      onChange={(e) => setTestCaseDescription(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Environment Configuration */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Environment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label htmlFor="environment" className="text-xs">Environment</Label>
+                    <Select value={selectedEnvironment} onValueChange={setSelectedEnvironment}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select environment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {environments.map((env) => (
+                          <SelectItem key={env.id} value={env.id}>
+                            {env.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="envUrl" className="text-xs">Environment URL</Label>
+                    <Input
+                      id="envUrl"
+                      placeholder="https://yourorg.crm.dynamics.com"
+                      value={environmentUrl}
+                      onChange={(e) => setEnvironmentUrl(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Credentials */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Key className="h-4 w-4" />
+                    Credentials
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label htmlFor="credentials" className="text-xs">Select Credentials</Label>
+                    <Select value={selectedCredential} onValueChange={setSelectedCredential}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Choose credentials" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCredentials.map((cred) => (
+                          <SelectItem key={cred.id} value={cred.id}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>{cred.name}</span>
+                              <Badge 
+                                variant={cred.status === 'active' ? 'default' : 'secondary'}
+                                className="ml-2 text-xs"
+                              >
+                                {cred.status}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Manage credentials in{" "}
+                    <Button variant="link" className="p-0 h-auto text-xs" asChild>
+                      <a href="/settings">Settings</a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-
-        {/* Test Case Configuration */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Test Case Details */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Test Case Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <Label htmlFor="testName" className="text-xs">Test Case Name</Label>
-                <Input
-                  id="testName"
-                  placeholder="Enter test case name"
-                  value={testCaseName}
-                  onChange={(e) => setTestCaseName(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="testDescription" className="text-xs">Description (Optional)</Label>
-                <Input
-                  id="testDescription"
-                  placeholder="Brief description"
-                  value={testCaseDescription}
-                  onChange={(e) => setTestCaseDescription(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Environment Configuration */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                Environment
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <Label htmlFor="environment" className="text-xs">Environment</Label>
-                <Select value={selectedEnvironment} onValueChange={setSelectedEnvironment}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select environment" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {environments.map((env) => (
-                      <SelectItem key={env.id} value={env.id}>
-                        {env.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="envUrl" className="text-xs">Environment URL</Label>
-                <Input
-                  id="envUrl"
-                  placeholder="https://yourorg.crm.dynamics.com"
-                  value={environmentUrl}
-                  onChange={(e) => setEnvironmentUrl(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Credentials */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Key className="h-4 w-4" />
-                Credentials
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <Label htmlFor="credentials" className="text-xs">Select Credentials</Label>
-                <Select value={selectedCredential} onValueChange={setSelectedCredential}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Choose credentials" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableCredentials.map((cred) => (
-                      <SelectItem key={cred.id} value={cred.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{cred.name}</span>
-                          <Badge 
-                            variant={cred.status === 'active' ? 'default' : 'secondary'}
-                            className="ml-2 text-xs"
-                          >
-                            {cred.status}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="text-xs text-gray-500">
-                Manage credentials in{" "}
-                <Button variant="link" className="p-0 h-auto text-xs" asChild>
-                  <a href="/settings">Settings</a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        )}
       </header>
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        <ComponentPalette />
-        <FlowCanvas
-          nodes={nodes}
-          connections={connections}
-          onNodesChange={setNodes}
-          onConnectionsChange={setConnections}
-          selectedNode={selectedNode}
-          onNodeSelect={setSelectedNode}
-        />
-        <PropertiesPanel
-          selectedNode={selectedNode}
-          onNodeUpdate={handleNodeUpdate}
-        />
+        {/* Collapsible Component Palette */}
+        {showComponentPalette ? (
+          <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+            <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="font-medium text-sm">Components</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowComponentPalette(false)}
+                className="p-1"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <ComponentPalette />
+            </div>
+          </div>
+        ) : (
+          <div className="w-12 bg-white border-r border-gray-200 flex flex-col">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowComponentPalette(true)}
+              className="m-2 p-2 h-8"
+            >
+              <ChevronDown className="h-4 w-4 rotate-90" />
+            </Button>
+          </div>
+        )}
+
+        {/* Flow Canvas */}
+        <div className="flex-1 relative">
+          <FlowCanvas
+            nodes={nodes}
+            connections={connections}
+            onNodesChange={setNodes}
+            onConnectionsChange={setConnections}
+            selectedNode={selectedNode}
+            onNodeSelect={setSelectedNode}
+          />
+        </div>
+
+        {/* Collapsible Properties Panel */}
+        {showPropertiesPanel ? (
+          <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+            <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="font-medium text-sm">Properties</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPropertiesPanel(false)}
+                className="p-1"
+              >
+                <ChevronRight className="h-4 w-4 rotate-180" />
+              </Button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <PropertiesPanel
+                selectedNode={selectedNode}
+                onNodeUpdate={handleNodeUpdate}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="w-12 bg-white border-l border-gray-200 flex flex-col">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPropertiesPanel(true)}
+              className="m-2 p-2 h-8"
+            >
+              <ChevronDown className="h-4 w-4 -rotate-90" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Test Results Modal */}

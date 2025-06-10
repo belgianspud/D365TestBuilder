@@ -95,50 +95,47 @@ export default function ComponentPalette() {
   };
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Test Components</h2>
+    <div className="h-full overflow-y-auto p-4">
+      <div className="mb-4">
         <p className="text-sm text-gray-600">Drag components to the canvas to build your test flow</p>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-6">
-          {categories.map((category) => (
-            <div key={category}>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">{category}</h3>
-              <div className="space-y-2">
-                {components
-                  .filter(component => component.category === category)
-                  .map((component) => {
-                    const IconComponent = component.icon;
-                    return (
-                      <Card
-                        key={component.id}
-                        className="p-3 cursor-move hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 border-gray-200"
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, component.type)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <IconComponent className={`h-5 w-5 ${component.color}`} />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm text-gray-900 truncate">
-                              {component.label}
-                            </div>
-                            <div className="text-xs text-gray-600 line-clamp-2">
-                              {component.description}
-                            </div>
+      <div className="space-y-6">
+        {categories.map((category) => (
+          <div key={category}>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">{category}</h3>
+            <div className="space-y-2">
+              {components
+                .filter(component => component.category === category)
+                .map((component) => {
+                  const IconComponent = component.icon;
+                  return (
+                    <Card
+                      key={component.id}
+                      className="p-3 cursor-move hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 border-gray-200"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, component.type)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <IconComponent className={`h-5 w-5 ${component.color}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-gray-900 truncate">
+                            {component.label}
+                          </div>
+                          <div className="text-xs text-gray-600 line-clamp-2">
+                            {component.description}
                           </div>
                         </div>
-                      </Card>
-                    );
-                  })}
-              </div>
-              {category !== categories[categories.length - 1] && (
-                <Separator className="mt-4" />
-              )}
+                      </div>
+                    </Card>
+                  );
+                })}
             </div>
-          ))}
-        </div>
+            {category !== categories[categories.length - 1] && (
+              <Separator className="mt-4" />
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

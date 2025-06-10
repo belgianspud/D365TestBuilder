@@ -47,16 +47,10 @@ export default function PropertiesPanel({ selectedNode, onNodeUpdate }: Properti
 
   if (!selectedNode) {
     return (
-      <div className="w-96 bg-white border-l border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Properties</h2>
-          <p className="text-sm text-gray-600">Configure step settings</p>
-        </div>
-        <div className="flex-1 flex items-center justify-center text-center text-gray-500 py-8">
-          <div>
-            <MousePointer className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">Select a step in the flow to configure its properties</p>
-          </div>
+      <div className="h-full flex items-center justify-center text-center text-gray-500 py-8">
+        <div>
+          <MousePointer className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p className="text-sm">Select a step in the flow to configure its properties</p>
         </div>
       </div>
     );
