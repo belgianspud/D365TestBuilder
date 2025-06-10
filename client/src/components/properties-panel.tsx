@@ -61,14 +61,13 @@ export default function PropertiesPanel({ selectedNode, onNodeUpdate }: Properti
   const selectedField = formData.entity && formData.field ? getFieldByName(formData.entity, formData.field) : null;
 
   return (
-    <div className="w-96 bg-white border-l border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Properties</h2>
-        <p className="text-sm text-gray-600">{selectedNode.data.label}</p>
+    <div className="h-full overflow-y-auto p-4">
+      <div className="mb-4">
+        <h3 className="text-sm font-medium text-gray-900 mb-1">{selectedNode.data.label}</h3>
+        <p className="text-xs text-gray-600">Configure step settings</p>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-6">
+      <div className="space-y-6">
           {/* Navigate to Record Properties */}
           {selectedNode.type === 'navigate-record' && (
             <>
@@ -405,18 +404,18 @@ export default function PropertiesPanel({ selectedNode, onNodeUpdate }: Properti
             </div>
           )}
         </div>
+      </div>
 
-        {/* Action Buttons */}
-        <div className="border-t border-gray-200 pt-4 mt-6">
-          <div className="flex gap-3">
-            <Button onClick={handleApplyChanges} className="flex-1">
-              <Check className="h-4 w-4 mr-2" />
-              Apply Changes
-            </Button>
-            <Button variant="outline" onClick={handleDeleteNode}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Action Buttons */}
+      <div className="border-t border-gray-200 pt-4 mt-6">
+        <div className="flex gap-3">
+          <Button onClick={handleApplyChanges} className="flex-1">
+            <Check className="h-4 w-4 mr-2" />
+            Apply Changes
+          </Button>
+          <Button variant="outline" onClick={handleDeleteNode}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
