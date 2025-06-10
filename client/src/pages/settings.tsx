@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings as SettingsIcon, Save, Bell, Database, Shield, Globe } from "lucide-react";
+import { Settings as SettingsIcon, Save, Bell, Database, Shield, Globe, Key, Plus, Edit, Trash2 } from "lucide-react";
 
 export default function Settings() {
   const [settings, setSettings] = useState({
@@ -55,8 +55,9 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="credentials">Credentials</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="d365">D365 Connection</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
