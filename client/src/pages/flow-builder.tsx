@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +19,7 @@ export default function FlowBuilder() {
   const queryClient = useQueryClient();
 
   // Load initial test case
-  const { data: testCases, isLoading } = useQuery({
+  const { data: testCases, isLoading } = useQuery<TestCase[]>({
     queryKey: ['/api/test-cases'],
   });
 
@@ -69,14 +69,14 @@ export default function FlowBuilder() {
   const [connections, setConnections] = useState<FlowConnection[]>([]);
 
   // Load the first test case on mount
-  useState(() => {
-    if (testCases && testCases.length > 0) {
+  useEffect(() => {
+    if (testCases && Array.isArray(testCases) && testCases.length > 0 && !currentTestCase) {
       const firstTestCase = testCases[0];
       setCurrentTestCase(firstTestCase);
-      setNodes(firstTestCase.nodes);
-      setConnections(firstTestCase.connections);
+      setNodes(firstTestCase.nodes || []);
+      setConnections(firstTestCase.connections || []);
     }
-  });
+  }, [testCases, currentTestCase]);
 
   const handleSave = useCallback(() => {
     const testCaseName = currentTestCase?.name || "New Test Case";
@@ -92,11 +92,11 @@ export default function FlowBuilder() {
 
   const handleLoad = useCallback(() => {
     // For now, load the first available test case
-    if (testCases && testCases.length > 0) {
+    if (testCases && Array.isArray(testCases) && testCases.length > 0) {
       const testCase = testCases[0];
       setCurrentTestCase(testCase);
-      setNodes(testCase.nodes);
-      setConnections(testCase.connections);
+      setNodes(testCase.nodes || []);
+      setConnections(testCase.connections || []);
       toast({
         title: "Success",
         description: "Test case loaded successfully!",
@@ -155,7 +155,7 @@ export default function FlowBuilder() {
             variant="outline"
             size="sm"
             onClick={handleLoad}
-            disabled={!testCases || testCases.length === 0}
+            disabled={!testCases || !Array.isArray(testCases) || testCases.length === 0}
           >
             <FolderOpen className="h-4 w-4 mr-2" />
             Load

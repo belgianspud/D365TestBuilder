@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import ReactFlow, {
   Node,
   Edge,
@@ -155,12 +155,12 @@ export default function FlowCanvas({
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(reactFlowEdges);
 
   // Update ReactFlow nodes when flowNodes change
-  useState(() => {
+  useEffect(() => {
     setNodes(reactFlowNodes);
   }, [flowNodes]);
 
   // Update ReactFlow edges when flowConnections change
-  useState(() => {
+  useEffect(() => {
     setEdges(reactFlowEdges);
   }, [flowConnections]);
 
