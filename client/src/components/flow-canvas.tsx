@@ -12,6 +12,7 @@ import ReactFlow, {
   Handle,
   Position,
   NodeProps,
+  MarkerType,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { Card } from "@/components/ui/card";
@@ -148,7 +149,12 @@ export default function FlowCanvas({
     sourceHandle: conn.sourceHandle,
     targetHandle: conn.targetHandle,
     animated: true,
+    deletable: true,
+    focusable: true,
     style: { stroke: '#3b82f6', strokeWidth: 2 },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+    },
   }));
 
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(reactFlowNodes);
@@ -239,8 +245,37 @@ export default function FlowCanvas({
         });
         onNodesChange(updatedFlowNodes);
       }
+      
+      // Handle node removal
+      const removeChanges = changes.filter(change => change.type === 'remove');
+      if (removeChanges.length > 0) {
+        const nodeIdsToRemove = removeChanges.map(change => change.id);
+        const updatedFlowNodes = flowNodes.filter(node => !nodeIdsToRemove.includes(node.id));
+        onNodesChange(updatedFlowNodes);
+        
+        // Also remove connections involving deleted nodes
+        const updatedConnections = flowConnections.filter(conn => 
+          !nodeIdsToRemove.includes(conn.source) && !nodeIdsToRemove.includes(conn.target)
+        );
+        onConnectionsChange(updatedConnections);
+      }
     },
-    [onNodesChangeInternal, flowNodes, onNodesChange]
+    [onNodesChangeInternal, flowNodes, onNodesChange, flowConnections, onConnectionsChange]
+  );
+
+  const onEdgesChangeWrapper = useCallback(
+    (changes: any[]) => {
+      onEdgesChangeInternal(changes);
+      
+      // Handle edge/connection removal
+      const removeChanges = changes.filter(change => change.type === 'remove');
+      if (removeChanges.length > 0) {
+        const edgeIdsToRemove = removeChanges.map(change => change.id);
+        const updatedConnections = flowConnections.filter(conn => !edgeIdsToRemove.includes(conn.id));
+        onConnectionsChange(updatedConnections);
+      }
+    },
+    [onEdgesChangeInternal, flowConnections, onConnectionsChange]
   );
 
   return (
@@ -249,7 +284,7 @@ export default function FlowCanvas({
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChangeWrapper}
-        onEdgesChange={onEdgesChangeInternal}
+        onEdgesChange={onEdgesChangeWrapper}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         onDrop={onDrop}
@@ -258,6 +293,9 @@ export default function FlowCanvas({
         fitView
         snapToGrid
         snapGrid={[20, 20]}
+        deleteKeyCode={['Backspace', 'Delete']}
+        multiSelectionKeyCode={['Meta', 'Ctrl']}
+        selectionKeyCode={null}
       >
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
@@ -270,6 +308,15 @@ export default function FlowCanvas({
             <p className="text-lg font-medium mb-2">Build Your Test Flow</p>
             <p className="text-sm">Drag components from the left panel to create automated test scenarios for Dynamics 365</p>
           </div>
+        </div>
+      )}
+      
+      {flowNodes.length > 0 && (
+        <div className="absolute top-4 right-4 bg-white border border-gray-200 rounded-lg p-3 shadow-sm text-xs text-gray-600 max-w-xs pointer-events-none">
+          <div className="font-medium mb-1">Connection Controls:</div>
+          <div>• Drag between nodes to connect</div>
+          <div>• Click connection and press Delete/Backspace to remove</div>
+          <div>• Select nodes and press Delete to remove them</div>
         </div>
       )}
     </div>
