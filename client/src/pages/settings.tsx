@@ -34,6 +34,53 @@ export default function Settings() {
     }
   });
 
+  const [credentials, setCredentials] = useState([
+    {
+      id: "cred1",
+      name: "Production Admin",
+      environment: "Production",
+      status: "active",
+      username: "admin@yourorg.com",
+      lastUsed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    },
+    {
+      id: "cred2",
+      name: "Staging Service Account",
+      environment: "Staging",
+      status: "active",
+      username: "service@yourorg.com",
+      lastUsed: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
+    },
+    {
+      id: "cred3",
+      name: "Dev Environment",
+      environment: "Development",
+      status: "active",
+      username: "devuser@yourorg.com",
+      lastUsed: new Date(Date.now() - 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    },
+    {
+      id: "cred4",
+      name: "Test User Account",
+      environment: "Development",
+      status: "inactive",
+      username: "testuser@yourorg.com",
+      lastUsed: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
+    }
+  ]);
+
+  const [showAddCredential, setShowAddCredential] = useState(false);
+  const [newCredential, setNewCredential] = useState({
+    name: "",
+    environment: "",
+    username: "",
+    password: ""
+  });
+
   const handleSave = () => {
     // In a real app, this would save to the backend
     console.log("Saving settings:", settings);
@@ -119,6 +166,136 @@ export default function Settings() {
                       }))}
                     />
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Credentials Management */}
+          <TabsContent value="credentials">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  Credential Management
+                </CardTitle>
+                <Button onClick={() => setShowAddCredential(!showAddCredential)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Credential
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {showAddCredential && (
+                  <Card className="border-dashed">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Add New Credential</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="credName">Credential Name</Label>
+                          <Input
+                            id="credName"
+                            placeholder="e.g., Production Admin"
+                            value={newCredential.name}
+                            onChange={(e) => setNewCredential(prev => ({ ...prev, name: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="credEnv">Environment</Label>
+                          <Select
+                            value={newCredential.environment}
+                            onValueChange={(value) => setNewCredential(prev => ({ ...prev, environment: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select environment" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="development">Development</SelectItem>
+                              <SelectItem value="staging">Staging</SelectItem>
+                              <SelectItem value="production">Production</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="credUsername">Username/Email</Label>
+                          <Input
+                            id="credUsername"
+                            type="email"
+                            placeholder="user@yourorg.com"
+                            value={newCredential.username}
+                            onChange={(e) => setNewCredential(prev => ({ ...prev, username: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="credPassword">Password</Label>
+                          <Input
+                            id="credPassword"
+                            type="password"
+                            placeholder="Enter password"
+                            value={newCredential.password}
+                            onChange={(e) => setNewCredential(prev => ({ ...prev, password: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={() => {
+                          setCredentials(prev => [...prev, {
+                            id: `cred${Date.now()}`,
+                            ...newCredential,
+                            status: "active",
+                            lastUsed: new Date(),
+                            createdAt: new Date()
+                          }]);
+                          setNewCredential({ name: "", environment: "", username: "", password: "" });
+                          setShowAddCredential(false);
+                        }}>
+                          Save Credential
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowAddCredential(false)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Existing Credentials</h3>
+                  {credentials.map((credential) => (
+                    <Card key={credential.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Key className="h-5 w-5 text-gray-400" />
+                            <div>
+                              <div className="font-medium">{credential.name}</div>
+                              <div className="text-sm text-gray-500">
+                                {credential.username} • {credential.environment}
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                Last used: {credential.lastUsed.toLocaleDateString()} • 
+                                Created: {credential.createdAt.toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              variant={credential.status === 'active' ? 'default' : 'secondary'}
+                            >
+                              {credential.status}
+                            </Badge>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
